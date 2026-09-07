@@ -1,0 +1,16 @@
+{
+  "name": "meridian-coach-operations",
+  "version": "2.1.0",
+  "description": "Meridian Coach Operations Platform — whole-coach charter with multi-coach bookings",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test.js && node test-agent.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
