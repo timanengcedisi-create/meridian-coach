@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meridian Coach Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="crest">MC</div>
+        <div>
+          <h1>Meridian Coach</h1>
+          <p>Operations</p>
+        </div>
+      </div>
+      <nav class="nav">
+        <button data-page="overview" class="active">Operations overview</button>
+        <button data-page="bookings">Booking management</button>
+        <button data-page="trips">Trips and routes</button>
+        <button data-page="passengers">Passenger records</button>
+        <button data-page="luggage">Lost luggage</button>
+        <button data-page="desk">AI service desk</button>
+        <button data-page="agent">AI Agent Manager</button>
+        <button data-page="queue">Agent queue and calls</button>
+        <button data-page="audit">Audit log</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <div>
+          <h2 id="pageTitle">Operations overview</h2>
+          <p>Whole-coach charter · select coaches · capacity = coaches × 65 · one reference per booking</p>
+        </div>
+        <div class="chip">Fleet rule: never sell individual seats</div>
+      </div>
+
+      <section id="overview" class="page active">
+        <div class="grid stats" id="overviewStats"></div>
+        <div class="card" style="margin-top:16px">
+          <h3>Live rule</h3>
+          <p>Customers hire entire 65-seat coaches. Staff select how many coaches to charter. Total capacity = number of coaches × 65. One booking reference holds every assigned coach.</p>
+        </div>
+      </section>
+
+      <section id="bookings" class="page">
+        <div class="grid split">
+          <div class="card">
+            <h3>New charter booking</h3>
+            <form id="bookingForm" class="form-grid">
+              <div>
+                <label>Customer Name *</label>
+                <input name="customerName" required />
+              </div>
+              <div>
+                <label>Company / Organisation</label>
+                <input name="companyName" />
+              </div>
+              <div>
+                <label>Phone Number *</label>
+                <input name="phone" required />
+              </div>
+              <div>
+                <label>Email Address</label>
+                <input name="email" type="email" />
+              </div>
+              <div>
+                <label>Pickup Location *</label>
+                <input name="pickupLocation" required />
+              </div>
+              <div>
+                <label>Destination *</label>
+                <input name="destination" required />
+              </div>
+              <div>
+                <label>Departure Date and Time *</label>
+                <input name="departureAt" type="datetime-local" required />
+              </div>
+              <div>
+                <label>Return Date and Time</label>
+                <input name="returnAt" type="datetime-local" />
+              </div>
+              <div>
+                <label>Number of Coaches Required *</label>
+                <div class="qty">
+                  <button type="button" id="coachMinus" aria-label="Fewer coaches">−</button>
+                  <input name="numberOfCoaches" id="numberOfCoaches" type="number" min="1" max="20" step="1" value="1" required />
+                  <button type="button" id="coachPlus" aria-label="More coaches">+</button>
+                </div>
+              </div>
+              <div>
+                <label>Number of Days</label>
+                <input name="numberOfDays" type="number" min="1" step="1" value="1" />
+              </div>
+              <div>
+                <label>Seats Per Coach</label>
+                <input value="65" readonly />
+              </div>
+              <div>
+                <label>Or choose from list</label>
+                <select id="coachSelect">
+                  <option value="1">1 Coach</option>
+                  <option value="2">2 Coaches</option>
+                  <option value="3">3 Coaches</option>
+                  <option value="4">4 Coaches</option>
+                  <option value="5">5 Coaches</option>
+                  <option value="6">6 Coaches</option>
+                  <option value="7">7 Coaches</option>
+                  <option value="8">8 Coaches</option>
+                </select>
+              </div>
+              <div class="full">
+                <label>Special Requirements</label>
+                <textarea name="specialRequirements"></textarea>
+              </div>
+              <div class="full">
+                <label>Internal Notes</label>
+                <textarea name="internalNotes"></textarea>
+              </div>
+            </form>
+            <div class="calc" id="calcBox">
+              <div class="calc-row"><span>Coaches Selected</span><strong id="cReq">1</strong></div>
+              <div class="calc-row"><span>Seats Per Coach</span><strong>65</strong></div>
+              <div class="calc-row"><span>Capacity Calculation</span><strong id="cExpr">65</strong></div>
+              <div class="calc-row"><span>Total Available Capacity</span><strong id="cCap">65 seats</strong></div>
+              <div class="calc-row"><span>Available Coaches</span><strong id="cAvail">—</strong></div>
+              <div id="availMsg" class="msg info">Select coaches and a departure date to check fleet availability.</div>
+            </div>
+            <div class="actions">
+              <button class="btn" id="confirmBtn" type="button" disabled>Confirm Coach Charter</button>
+              <button class="btn ghost" id="resetBtn" type="button">Clear form</button>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Receipt preview</h3>
+            <div id="receipt" class="receipt muted">Confirm a booking to preview the charter receipt.</div>
+            <div class="actions">
+              <button class="btn ghost" id="smsBtn" type="button" disabled>SMS confirmation</button>
+              <button class="btn ghost" id="waBtn" type="button" disabled>WhatsApp confirmation</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3>Booking records</h3>
+          <div id="bookingTable"></div>
+        </div>
+      </section>
+
+      <section id="trips" class="page">
+        <div class="card" id="routesCard"></div>
+        <div class="card" style="margin-top:16px" id="fleetCard"></div>
+      </section>
+
+      <section id="passengers" class="page">
+        <div class="card">
+          <h3>Passenger records</h3>
+          <p class="muted">Passenger names are contact records against a charter booking. Seats are not sold individually.</p>
+          <div id="passengerTable"></div>
+        </div>
+      </section>
+
+      <section id="luggage" class="page">
+        <div class="card">
+          <h3>Lost luggage</h3>
+          <form id="luggageForm" class="form-grid">
+            <div class="full">
+              <label>Description</label>
+              <input name="description" required placeholder="Black suitcase, red ribbon" />
+            </div>
+          </form>
+          <div class="actions"><button class="btn" id="luggageBtn" type="button">Log item</button></div>
+          <div id="luggageTable"></div>
+        </div>
+      </section>
+
+      <section id="desk" class="page">
+        <div class="card">
+          <h3>AI service desk</h3>
+          <textarea id="deskQ" placeholder="Ask about coach capacity, multi-coach charters, or availability..."></textarea>
+          <div class="actions"><button class="btn" id="deskBtn" type="button">Ask desk</button></div>
+          <p id="deskA" class="msg info">Ready.</p>
+        </div>
+      </section>
+
+      <section id="agent" class="page">
+        <div class="card" id="agentGate">
+          <h3>Authorised staff only</h3>
+          <p class="muted">Enter the operations PIN to edit the Vapi voice agent instructions. Default PIN is 2468 unless changed on the server.</p>
+          <label>Staff PIN</label>
+          <input id="staffPin" type="password" />
+          <div class="actions"><button class="btn" id="staffLoginBtn" type="button">Sign in</button></div>
+          <p id="agentGateMsg" class="msg info">Instructions are not saved until you approve a preview.</p>
+        </div>
+        <div id="agentStudio" class="hidden">
+          <div class="card">
+            <h3>Current approved instructions</h3>
+            <div id="agentSections"></div>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <h3>Staff instruction</h3>
+            <textarea id="agentInstruction" placeholder="Mention our new evening route to Trichardt in the greeting."></textarea>
+            <div class="actions">
+              <button class="btn" id="agentPreviewBtn" type="button">Preview update</button>
+            </div>
+            <p id="agentMsg" class="msg info">The engine will change only one section. Approved text is what the Vapi voice agent should read.</p>
+          </div>
+          <div class="card hidden" id="agentPreviewCard" style="margin-top:16px">
+            <h3>Preview — approve before saving</h3>
+            <p><strong>Section:</strong> <span id="prevSection"></span></p>
+            <p class="muted">Previous content</p>
+            <pre id="prevOld" class="preblock"></pre>
+            <p class="muted">New proposed content</p>
+            <pre id="prevNew" class="preblock"></pre>
+            <div class="actions">
+              <button class="btn" id="agentApproveBtn" type="button">Approve &amp; Save</button>
+              <button class="btn ghost" id="agentCancelBtn" type="button">Cancel</button>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <h3>Version history</h3>
+            <div id="agentHistory"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="queue" class="page">
+        <div class="card" id="queueCard"></div>
+      </section>
+
+      <section id="audit" class="page">
+        <div class="card" id="auditCard"></div>
+      </section>
+    </main>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
